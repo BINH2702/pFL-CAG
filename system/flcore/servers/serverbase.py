@@ -377,7 +377,7 @@ class Server(object):
             self.writer.add_scalar("charts/test_auc_std", test_auc_std, self.current_round)
             wandb.log({"charts/test_auc_std": test_auc_std}, step=self.current_round)
 
-        self.current_round += 1
+            self.current_round += 1
 
     def print_(self, test_acc, test_auc, train_loss):
         print("Average Test Accurancy: {:.4f}".format(test_acc))
