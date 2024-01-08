@@ -26,6 +26,7 @@ class FedTest(Server):
         self.momentum = args.momentum
         self.step_size = args.step_size
         self.gamma = args.gamma
+        self.device_id = args.device_id
 
     def train(self):
         for i in range(self.global_rounds+1):
@@ -75,49 +76,50 @@ class FedTest(Server):
         self.save_global_model()
 
     def cagrad(self, grad_vec, num_tasks):
+        
+        with torch.cuda.device(self.device_id):
+            grads = grad_vec.cuda()
 
-        grads = grad_vec.cuda()
+            GG = grads.t().mm(grads)
+            # to(device)
+            scale = (torch.diag(GG)+1e-4).sqrt().mean()
+            GG = GG / scale.pow(2)
+            Gg = GG.mean(1, keepdims=True)
+            gg = Gg.mean(0, keepdims=True)
 
-        GG = grads.t().mm(grads)
-        # to(device)
-        scale = (torch.diag(GG)+1e-4).sqrt().mean()
-        GG = GG / scale.pow(2)
-        Gg = GG.mean(1, keepdims=True)
-        gg = Gg.mean(0, keepdims=True)
+            w = torch.zeros(num_tasks, 1, requires_grad=True, device=cuda)
 
-        w = torch.zeros(num_tasks, 1, requires_grad=True, device='cuda')
+            if num_tasks == 50:
+                w_opt = torch.optim.SGD([w], lr=self.cagrad_learning_rate*2, momentum=self.momentum)
+            else:
+                w_opt = torch.optim.SGD([w], lr=self.cagrad_learning_rate, momentum=self.momentum)
 
-        if num_tasks == 50:
-            w_opt = torch.optim.SGD([w], lr=self.cagrad_learning_rate*2, momentum=self.momentum)
-        else:
-            w_opt = torch.optim.SGD([w], lr=self.cagrad_learning_rate, momentum=self.momentum)
+            scheduler = StepLR(w_opt, step_size=self.step_size, gamma=self.gamma)
 
-        scheduler = StepLR(w_opt, step_size=self.step_size, gamma=self.gamma)
+            c = (gg+1e-4).sqrt() * self.cagrad_c
 
-        c = (gg+1e-4).sqrt() * self.cagrad_c
+            w_best = None
+            obj_best = np.inf
+            for i in range(self.cagrad_rounds+1):
+                w_opt.zero_grad()
+                ww = torch.softmax(w, dim=0)
+                obj = ww.t().mm(Gg) + c * (ww.t().mm(GG).mm(ww) + 1e-4).sqrt()
+                if obj.item() < obj_best:
+                    obj_best = obj.item()
+                    w_best = w.clone()
+                if i < self.cagrad_rounds:
+                    obj.backward()
+                    w_opt.step()
+                    scheduler.step()
 
-        w_best = None
-        obj_best = np.inf
-        for i in range(self.cagrad_rounds+1):
-            w_opt.zero_grad()
-            ww = torch.softmax(w, dim=0)
-            obj = ww.t().mm(Gg) + c * (ww.t().mm(GG).mm(ww) + 1e-4).sqrt()
-            if obj.item() < obj_best:
-                obj_best = obj.item()
-                w_best = w.clone()
-            if i < self.cagrad_rounds:
-                obj.backward()
-                w_opt.step()
-                scheduler.step()
+                    # Check this scheduler. step()
 
-                # Check this scheduler. step()
+            ww = torch.softmax(w_best, dim=0)
+            gw_norm = (ww.t().mm(GG).mm(ww)+1e-4).sqrt()
 
-        ww = torch.softmax(w_best, dim=0)
-        gw_norm = (ww.t().mm(GG).mm(ww)+1e-4).sqrt()
-
-        lmbda = c.view(-1) / (gw_norm+1e-4)
-        g = ((1/num_tasks + ww * lmbda).view(
-            -1, 1).to(grads.device) * grads.t()).sum(0) / (1 + self.cagrad_c**2)
+            lmbda = c.view(-1) / (gw_norm+1e-4)
+            g = ((1/num_tasks + ww * lmbda).view(
+                -1, 1).to(grads.device) * grads.t()).sum(0) / (1 + self.cagrad_c**2)
         return g
 
     # def overwrite_grad(self, m, newgrad, grad_dims):
