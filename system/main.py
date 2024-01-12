@@ -10,8 +10,8 @@ import torchvision
 import logging
 
 from flcore.servers.serveravg import FedAvg
-from flcore.servers.serverCAGrad import FedCAGrad
-from flcore.servers.server_test import FedTest
+# from flcore.servers.serverCAGrad import FedCAGrad
+from flcore.servers.server_test import FedCAG
 # from flcore.servers.serverpFedMe import pFedMe
 # from flcore.servers.serverperavg import PerAvg
 # from flcore.servers.serverprox import FedProx
@@ -184,11 +184,11 @@ def run(args):
             # args.model = BaseHeadSplit(args.model, args.head)
             server = FedAvg(args, i)
 
-        elif args.algorithm == "FedCAGrad":
-            server = FedCAGrad(args, i)
+#         elif args.algorithm == "FedCAGrad":
+#             server = FedCAGrad(args, i)
 
-        elif args.algorithm == "FedTest":
-            server = FedTest(args, i)
+        elif args.algorithm == "FedCAG":
+            server = FedCAG(args, i)
 
         # elif args.algorithm == "Local":
         #     server = Local(args, i)
@@ -351,9 +351,9 @@ if __name__ == "__main__":
     # general
     parser.add_argument('-go', "--goal", type=str, default="test", 
                         help="The goal for this experiment")
-    parser.add_argument('-dev', "--device", type=str, default="cuda",
-                        choices=["cpu", "cuda"])
-    parser.add_argument('-did', "--device_id", type=str, default="0")
+#     parser.add_argument('-dev', "--device", type=str, default="cuda",
+#                         choices=["cpu", "cuda"])
+    parser.add_argument('-did', "--device_id", type=int, default=0)
     parser.add_argument('-data', "--dataset", type=str, default="mnist")
     parser.add_argument('-nb', "--num_classes", type=int, default=10)
     parser.add_argument('-mstr', "--model_str", type=str, default="cnn")
@@ -472,11 +472,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = args.device_id
+#     os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
 
-    if args.device == "cuda" and not torch.cuda.is_available():
-        print("\ncuda is not avaiable.\n")
-        args.device = "cpu"
+    args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu", index = args.device_id)
 
     print("=" * 50)
 
