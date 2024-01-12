@@ -20,7 +20,7 @@ class FedCAG(Server):
 
         self.Budget = []
         self.update_grads = None
-        self.cagrad_c = 0.5
+        self.cagrad_c = args.c_parameter
         self.cagrad_rounds = args.cagrad_rounds
         self.cagrad_learning_rate = args.cagrad_learning_rate
         self.momentum = args.momentum
