@@ -7,7 +7,7 @@ import numpy as np
 import torch
 from torch.optim.lr_scheduler import StepLR
 
-class FedROD(Server):
+class FedCAG_ROD(Server):
     def __init__(self, args, times):
         super().__init__(args, times)
 
@@ -20,7 +20,7 @@ class FedROD(Server):
 
         self.Budget = []
         self.update_grads = None
-        self.cagrad_c = 0.5
+        self.cagrad_c = args.c_parameter
         self.cagrad_rounds = args.cagrad_rounds
         self.cagrad_learning_rate = args.cagrad_learning_rate
         self.momentum = args.momentum
