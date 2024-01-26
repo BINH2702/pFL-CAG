@@ -26,6 +26,7 @@ class FedCAG_ROD(Server):
         self.momentum = args.momentum
         self.step_size = args.step_size
         self.gamma = args.gamma
+        self.device = args.device
 
     def train(self):
         for i in range(self.global_rounds+1):
@@ -76,7 +77,7 @@ class FedCAG_ROD(Server):
 
     def cagrad(self, grad_vec, num_tasks):
 
-        grads = grad_vec.cuda()
+        grads = grad_vec.to(self.device)
 
         GG = grads.t().mm(grads)
         # to(device)
@@ -85,7 +86,7 @@ class FedCAG_ROD(Server):
         Gg = GG.mean(1, keepdims=True)
         gg = Gg.mean(0, keepdims=True)
 
-        w = torch.zeros(num_tasks, 1, requires_grad=True, device='cuda')
+        w = torch.zeros(num_tasks, 1, requires_grad=True, device=self.device)
 
         if num_tasks == 50:
             w_opt = torch.optim.SGD([w], lr=self.cagrad_learning_rate*2, momentum=self.momentum)
