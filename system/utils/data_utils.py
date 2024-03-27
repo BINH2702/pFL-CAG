@@ -2,7 +2,7 @@ import numpy as np
 import os
 import torch
 
-data_path = '/binh/pFL-CAG/dataset/'
+data_path = '/home/protector/binh/pFL-CAG/dataset/'
 
 def read_data(dataset, idx, niid, balance, alpha, is_train=True, num_clients=None):
     if is_train:
