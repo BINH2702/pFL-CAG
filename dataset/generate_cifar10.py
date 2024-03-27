@@ -76,4 +76,4 @@ if __name__ == "__main__":
     num_clients = int(sys.argv[4]) if sys.argv[4] else 20
     alpha = float(sys.argv[5]) if sys.argv[5] else 0.1
 
-    generate_cifar10(dir_path, num_clients, num_classes, niid, balance, partition, alpha) 
+    generate_cifar10(dir_path, num_clients, num_classes, niid, balance, partition, alpha)
