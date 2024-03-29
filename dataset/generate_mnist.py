@@ -82,3 +82,4 @@ if __name__ == "__main__":
     alpha = float(sys.argv[5]) if sys.argv[5] else 0.1
 
     generate_mnist(dir_path, num_clients, num_classes, niid, balance, partition, alpha)
+
