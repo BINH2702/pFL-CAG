@@ -37,9 +37,9 @@ def generate_emnist(dir_path, num_clients, num_classes, niid, balance, partition
     transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize([0.5], [0.5])])
 
     trainset = torchvision.datasets.EMNIST(
-        root=dir_path + "rawdata", train=True, split="byclass", download=True, transform=transform)
+        root=dir_path + "rawdata", train=True, split="mnist", download=True, transform=transform)
     testset = torchvision.datasets.EMNIST(
-        root=dir_path + "rawdata", train=False, split="byclass", download=True, transform=transform)
+        root=dir_path + "rawdata", train=False, split="mnist", download=True, transform=transform)
     trainloader = torch.utils.data.DataLoader(
         trainset, batch_size=len(trainset.data), shuffle=False)
     testloader = torch.utils.data.DataLoader(

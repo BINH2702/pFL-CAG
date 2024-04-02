@@ -29,19 +29,10 @@ class FedCAGrad(Server):
             self.selected_clients = self.select_clients()
             self.send_models()
 
-            # print(f"global_model parameters grad")
-            # for param in self.global_model.parameters():
-            #     print(param.grad)
-            # print("model")
-            # print(self.global_model.conv1[0].weight)
-
             if i % self.eval_gap == 0:
                 print(f"\n-------------Round number: {i}-------------")
                 print("\nEvaluate global model")
                 self.evaluate()
-
-            # for param in self.global_model.conv1.parameters():
-            #     print(param.data)
 
             for client in self.selected_clients:
                 client.train()
@@ -67,10 +58,6 @@ class FedCAGrad(Server):
             for param in self.global_model.parameters():
                 param.data += param.grad
 
-            # print("Model_update")
-            # for param in self.global_model.parameters():
-            #     print(param.grad)
-
             if self.dlg_eval and i % self.dlg_gap == 0:
                 self.call_dlg(i)
             # self.aggregate_parameters()
@@ -89,12 +76,12 @@ class FedCAGrad(Server):
         self.save_results()
         self.save_global_model()
 
-        if self.num_new_clients > 0:
-            self.eval_new_clients = True
-            self.set_new_clients(clientCAGrad)
-            print(f"\n-------------Fine tuning round-------------")
-            print("\nEvaluate new clients")
-            self.evaluate()
+        # if self.num_new_clients > 0:
+        #     self.eval_new_clients = True
+        #     self.set_new_clients(clientCAGrad)
+        #     print(f"\n-------------Fine tuning round-------------")
+        #     print("\nEvaluate new clients")
+        #     self.evaluate()
 
 
 def cagrad_test(grads, alpha=0.5, rescale=1):
