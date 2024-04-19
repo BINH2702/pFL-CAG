@@ -49,6 +49,7 @@ class FedROD(Server):
             self.aggregate_parameters()
 
             angle = [self.cos_sim(model_origin, self.global_model, models) for models in self.grads]
+            print(angle)
             self.angle_value = statistics.mean(angle)
 
             self.Budget.append(time.time() - s_t)
