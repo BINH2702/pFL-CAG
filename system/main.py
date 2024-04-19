@@ -25,6 +25,7 @@ from flcore.servers.server_test import FedCAG
 # from flcore.servers.serverrep import FedRep
 # from flcore.servers.serverphp import FedPHP
 # from flcore.servers.serverbn import FedBN
+from flcore.servers.serverrod import FedROD
 from flcore.servers.serverrod_cag import FedCAG_ROD
 # from flcore.servers.serverproto import FedProto
 # from flcore.servers.serverdyn import FedDyn
@@ -243,6 +244,12 @@ def run(args):
             args.model.fc = nn.Identity()
             args.model = BaseHeadSplit(args.model, args.head)
             server = FedCAG_ROD(args, i)
+
+        elif args.algorithm == "FedROD":
+            args.head = copy.deepcopy(args.model.fc)
+            args.model.fc = nn.Identity()
+            args.model = BaseHeadSplit(args.model, args.head)
+            server = FedROD(args, i)
         #
         # elif args.algorithm == "FedProto":
         #     args.head = copy.deepcopy(args.model.fc)

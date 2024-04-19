@@ -1,11 +1,12 @@
 import copy
 import time
-from flcore.clients.clientrod_cag import clientROD
+from flcore.clients.clientrod import clientROD
 from flcore.servers.serverbase import Server
 from threading import Thread
 import numpy as np
 import torch
 from torch.optim.lr_scheduler import StepLR
+import statistics
 
 class FedCAG_ROD(Server):
     def __init__(self, args, times):
@@ -27,6 +28,7 @@ class FedCAG_ROD(Server):
         self.step_size = args.step_size
         self.gamma = args.gamma
         self.device = args.device
+        model_origin = copy.deepcopy(args.model)
 
     def train(self):
         for i in range(self.global_rounds+1):
@@ -57,6 +59,8 @@ class FedCAG_ROD(Server):
             for param in self.global_model.parameters():
                 param.data += param.grad
 
+            angle = [self.cos_sim(model_origin, self.global_model, models) for models in self.grads]
+            self.angle_value = statistics.mean(angle)
             # if self.dlg_eval and i % self.dlg_gap == 0:
             #     self.call_dlg(i)
             # self.aggregate_parameters()
