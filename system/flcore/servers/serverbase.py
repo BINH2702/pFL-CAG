@@ -411,7 +411,7 @@ class Server(object):
             wandb.log({"charts/test_auc_std": test_auc_std}, step=self.current_round)
 
             self.writer.add_scalar("charts/angle_value", angle_value, self.current_round)
-            wandb.log({"charts/test_auc_std": angle_value}, step=self.current_round)
+            wandb.log({"charts/angle_value": angle_value}, step=self.current_round)
 
             self.current_round += 1
 
