@@ -3,7 +3,9 @@ from flcore.clients.clientavg import clientAVG
 from flcore.servers.serverbase import Server
 from threading import Thread
 import numpy
+import copy
 # import yaml
+import statistics
 
 
 class FedAvg(Server):
@@ -19,6 +21,9 @@ class FedAvg(Server):
 
         # self.load_model()
         self.Budget = []
+        self.device = args.device
+        model_origin = copy.deepcopy(args.model)
+
 
     def train(self):
         for i in range(self.global_rounds+1):
@@ -43,11 +48,13 @@ class FedAvg(Server):
 
             self.receive_models()
             self.receive_grads()
-
-            if self.dlg_eval and i % self.dlg_gap == 0:
-                self.call_dlg(i)
+            model_origin = copy.deepcopy(self.global_model)
+            # if self.dlg_eval and i % self.dlg_gap == 0:
+            #     self.call_dlg(i)
             # self.model_aggregate_new()
             self.aggregate_parameters()
+            angle = [self.cos_sim(model_origin, self.global_model, models) for models in range(self.grads)]
+            angle_value = statistics.mean(angle)
 
             # print(f"model_update")
             # for param in self.global_model.conv1.parameters():

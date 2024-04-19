@@ -36,6 +36,7 @@ class Server(object):
         self.save_folder_name = args.save_folder_name
         self.top_cnt = 100
         self.auto_break = args.auto_break
+
         # self.global_learning_rate_decay = args.global_learning_rate_decay
 
         self.cagrad_rounds = args.cagrad_rounds
@@ -215,6 +216,33 @@ class Server(object):
     def mul_params(self, w, client_model):
         for param in client_model.parameters():
             param.data = param.data.clone() * w
+
+    def diff_weight(self, model1, model2):
+        params1 = [p.data for p in model1.parameters()]
+        params2 = [p.data for p in model2.parameters()]
+
+        # Tính hiệu và norm của hiệu giữa các parameter tương ứng
+        diff_norms = [torch.norm(p1 - p2, p='fro') for p1, p2 in zip(params1, params2)]
+
+        # Tính tổng (hoặc trung bình) của các norm này để có một đại lượng đơn lẻ mô tả sự khác biệt
+        total_diff_norm = torch.sum(torch.stack(diff_norms))
+        return total_diff_norm.item()
+
+    def cos_sim(self, prev_model, model1, model2):
+        prev_param = torch.cat([p.data.view(-1) for p in prev_model.parameters()])
+        params1 = torch.cat([p.data.view(-1) for p in model1.parameters()])
+        params2 = torch.cat([p.data.view(-1) for p in model2.parameters()])
+
+        # print(f"prev:{prev_param[0]}")
+        # print(f"p1:{params1[0]}")
+        # print(f"p2:{params2[0]}")
+
+        grad1 = params1 - prev_param
+        grad2 = params2
+        # print(f"prev:{torch.norm(prev_param)}|p1:{torch.norm(params1)}|p2:{torch.norm(params2)}")
+        # print(f"g1:{torch.norm(grad1)}|g2:{torch.norm(grad2)}")
+        cos_sim = torch.dot(grad1, grad2) / (torch.norm(grad1) * torch.norm(grad2))
+        return cos_sim.item()
 
     def aggregate_parameters(self):
         assert (len(self.uploaded_models) > 0)

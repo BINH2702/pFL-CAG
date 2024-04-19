@@ -6,6 +6,7 @@ from threading import Thread
 import numpy as np
 import torch
 from torch.optim.lr_scheduler import StepLR
+import statistics
 
 class FedCAG(Server):
     def __init__(self, args, times):
@@ -27,6 +28,7 @@ class FedCAG(Server):
         self.step_size = args.step_size
         self.gamma = args.gamma
         self.device = args.device
+        model_origin = copy.deepcopy(args.model)
 
     def train(self):
         for i in range(self.global_rounds+1):
@@ -53,9 +55,13 @@ class FedCAG(Server):
 
             g = self.cagrad(grads, self.num_clients)
 
+            model_origin = copy.deepcopy(self.global_model)
             self.overwrite_grad2(self.global_model, g)
             for param in self.global_model.parameters():
                 param.data += param.grad
+
+            angle = [self.cos_sim(model_origin, self.global_model, models) for models in range(self.grads)]
+            angle_value = statistics.mean(angle)
 
             # if self.dlg_eval and i % self.dlg_gap == 0:
             #     self.call_dlg(i)

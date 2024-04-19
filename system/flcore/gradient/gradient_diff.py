@@ -44,6 +44,22 @@ class Algorithm(nn.Module):
         total_diff_norm = torch.sum(torch.stack(diff_norms))
         return total_diff_norm.item()
 
+    def cos_sim(self, prev_model, model1, model2):
+        prev_param = torch.cat([p.data.view(-1) for p in prev_model.parameters()])
+        params1 = torch.cat([p.data.view(-1) for p in model1.parameters()])
+        params2 = torch.cat([p.data.view(-1) for p in model2.parameters()])
+
+        # print(f"prev:{prev_param[0]}")
+        # print(f"p1:{params1[0]}")
+        # print(f"p2:{params2[0]}")
+
+        grad1 = params1 - prev_param
+        grad2 = params2
+        # print(f"prev:{torch.norm(prev_param)}|p1:{torch.norm(params1)}|p2:{torch.norm(params2)}")
+        # print(f"g1:{torch.norm(grad1)}|g2:{torch.norm(grad2)}")
+        cos_sim = torch.dot(grad1, grad2) / (torch.norm(grad1) * torch.norm(grad2))
+        return cos_sim.item()
+
 
 class Weight_diff(Algorithm):
 
@@ -88,11 +104,11 @@ class Weight_diff(Algorithm):
             if self.optimizer_specific_state[i_domain] is not None:
                 self.optimizer_specific[i_domain].load_state_dict(self.optimizer_specific_state[i_domain])
 
-    def fish(self, meta_weights, inner_weights, lr_meta):
-        meta_weights = ParamDict(meta_weights)
-        inner_weights = ParamDict(inner_weights)
-        meta_weights += lr_meta * (inner_weights - meta_weights)
-        return meta_weights
+    # def fish(self, meta_weights, inner_weights, lr_meta):
+    #     meta_weights = ParamDict(meta_weights)
+    #     inner_weights = ParamDict(inner_weights)
+    #     meta_weights += lr_meta * (inner_weights - meta_weights)
+    #     return meta_weights
 
     def update(self, minibatches, unlabeled=None):
         self.create_clone(minibatches[0][0].device, self.num_domains)
@@ -137,38 +153,38 @@ class Weight_diff(Algorithm):
         return self.network(x)
 
 
-class ParamDict(OrderedDict):
-    """Code adapted from https://github.com/Alok/rl_implementations/tree/master/reptile.
-    A dictionary where the values are Tensors, meant to represent weights of
-    a model. This subclass lets you perform arithmetic on weights directly."""
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, *kwargs)
-
-    def _prototype(self, other, op):
-        if isinstance(other, Number):
-            return ParamDict({k: op(v, other) for k, v in self.items()})
-        elif isinstance(other, dict):
-            return ParamDict({k: op(self[k], other[k]) for k in self})
-        else:
-            raise NotImplementedError
-
-    def __add__(self, other):
-        return self._prototype(other, operator.add)
-
-    def __rmul__(self, other):
-        return self._prototype(other, operator.mul)
-
-    __mul__ = __rmul__
-
-    def __neg__(self):
-        return ParamDict({k: -v for k, v in self.items()})
-
-    def __rsub__(self, other):
-        # a- b := a + (-b)
-        return self.__add__(other.__neg__())
-
-    __sub__ = __rsub__
-
-    def __truediv__(self, other):
-        return self._prototype(other, operator.truediv)
+# class ParamDict(OrderedDict):
+#     """Code adapted from https://github.com/Alok/rl_implementations/tree/master/reptile.
+#     A dictionary where the values are Tensors, meant to represent weights of
+#     a model. This subclass lets you perform arithmetic on weights directly."""
+#
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, *kwargs)
+#
+#     def _prototype(self, other, op):
+#         if isinstance(other, Number):
+#             return ParamDict({k: op(v, other) for k, v in self.items()})
+#         elif isinstance(other, dict):
+#             return ParamDict({k: op(self[k], other[k]) for k in self})
+#         else:
+#             raise NotImplementedError
+#
+#     def __add__(self, other):
+#         return self._prototype(other, operator.add)
+#
+#     def __rmul__(self, other):
+#         return self._prototype(other, operator.mul)
+#
+#     __mul__ = __rmul__
+#
+#     def __neg__(self):
+#         return ParamDict({k: -v for k, v in self.items()})
+#
+#     def __rsub__(self, other):
+#         # a- b := a + (-b)
+#         return self.__add__(other.__neg__())
+#
+#     __sub__ = __rsub__
+#
+#     def __truediv__(self, other):
+#         return self._prototype(other, operator.truediv)
