@@ -62,6 +62,7 @@ class Server(object):
         self.rs_test_acc = []
         self.rs_test_auc = []
         self.rs_train_loss = []
+        # self.angle_value = []
 
         self.times = times
         self.eval_gap = args.eval_gap
@@ -79,6 +80,7 @@ class Server(object):
         self.fine_tuning_epoch = args.fine_tuning_epoch
 
         self.args = args
+        self.angle_value = 0
 
         if self.args.log:
             args.run_name = f"{args.algorithm}__{args.dataset}__{args.num_clients}__{int(time.time())}"
@@ -355,6 +357,7 @@ class Server(object):
 
         return ids, num_samples, losses
 
+
     # evaluate selected clients
     def evaluate(self, acc=None, loss=None):
         stats = self.test_metrics()
@@ -369,6 +372,7 @@ class Server(object):
         train_loss = sum(stats_train[2])*1.0 / sum(stats_train[1])
         accs = [a / n for a, n in zip(stats[2], stats[1])]
         aucs = [a / n for a, n in zip(stats[3], stats[1])]
+        angle_value = self.angle_value
         
         if acc == None:
             self.rs_test_acc.append(test_acc)
@@ -404,6 +408,9 @@ class Server(object):
 
             self.writer.add_scalar("charts/test_auc_std", test_auc_std, self.current_round)
             wandb.log({"charts/test_auc_std": test_auc_std}, step=self.current_round)
+
+            self.writer.add_scalar("charts/angle_value", angle_value, self.current_round)
+            wandb.log({"charts/test_auc_std": angle_value}, step=self.current_round)
 
             self.current_round += 1
 
