@@ -243,8 +243,8 @@ class Server(object):
         grad2 = params2
         # print(f"prev:{torch.norm(prev_param)}|p1:{torch.norm(params1)}|p2:{torch.norm(params2)}")
         # print(f"g1:{torch.norm(grad1)}|g2:{torch.norm(grad2)}")
-        print(torch.dot(grad1, grad2))
-        print((torch.norm(grad1) * torch.norm(grad2)))
+        # print(torch.dot(grad1, grad2))
+        # print((torch.norm(grad1) * torch.norm(grad2)))
         cos_sim = torch.dot(grad1, grad2) / (torch.norm(grad1) * torch.norm(grad2))
         return cos_sim.item()
 
