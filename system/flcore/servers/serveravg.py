@@ -53,7 +53,7 @@ class FedAvg(Server):
             #     self.call_dlg(i)
             # self.model_aggregate_new()
             self.aggregate_parameters()
-            angle = [self.cos_sim(model_origin, self.global_model, models) for models in range(self.grads)]
+            angle = [self.cos_sim(model_origin, self.global_model, models) for models in self.grads]
             self.angle_value = statistics.mean(angle)
 
             # print(f"model_update")

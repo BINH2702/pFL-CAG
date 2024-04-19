@@ -392,6 +392,7 @@ class Server(object):
         test_auc_std = np.std(aucs).item()
         print("Std Test Accurancy: {:.4f}".format(np.std(accs)))
         print("Std Test AUC: {:.4f}".format(np.std(aucs)))
+        print("Angle_Value: {:.4f}".format(angle_value))
 
         if self.args.log:
             self.writer.add_scalar("charts/train_loss", train_loss, self.current_round)
