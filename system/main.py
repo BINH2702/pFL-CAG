@@ -91,7 +91,7 @@ def run(args):
         elif model_str == "cnn": # non-convex
             if "mnist" in args.dataset:
                 args.model = FedAvgCNN(in_features=1, num_classes=args.num_classes, dim=1024).to(args.device)
-            elif "cifar10" in args.dataset:
+            elif "Cifar10" in args.dataset:
                 args.model = FedAvgCNN(in_features=3, num_classes=args.num_classes, dim=1600).to(args.device)
             elif "omniglot" in args.dataset:
                 args.model = FedAvgCNN(in_features=1, num_classes=args.num_classes, dim=33856).to(args.device)
