@@ -234,7 +234,7 @@ class Server(object):
         prev_param = torch.cat([p.data.view(-1) for p in prev_model.parameters()])
         params1 = torch.cat([p.data.view(-1) for p in model1.parameters()])
         params2 = torch.cat([p.data.view(-1) for p in model2.parameters()])
-
+        params = torch.cat([p.data for p in model2.parameters()])
         # print(f"prev:{prev_param[0]}")
         # print(f"p1:{params1[0]}")
         # print(f"p2:{params2[0]}")
@@ -246,10 +246,11 @@ class Server(object):
         # print(torch.dot(grad1, grad2))
         # print((torch.norm(grad1) * torch.norm(grad2)))
         cos_sim = torch.dot(grad1, grad2) / (torch.norm(grad1) * torch.norm(grad2))
+        print(cos_sim.item())
         if torch.isnan(cos_sim):
             print("cos_sim is NaN.")
             print("value of params1", params1)
-            print("value of params2", params2)
+            print("value of params2", params)
             print("Value of grad1:", grad1)
             print("Value of grad2:", grad2)
         return cos_sim.item()
