@@ -60,6 +60,9 @@ class FedCAG_ROD(Server):
             for param in self.global_model.parameters():
                 param.data += param.grad
 
+            for model in self.grads:
+                print(model.parameters())
+                
             angle = [self.cos_sim(model_origin, self.global_model, models) for models in self.grads]
             self.angle_value = statistics.mean(angle)
             # if self.dlg_eval and i % self.dlg_gap == 0:
