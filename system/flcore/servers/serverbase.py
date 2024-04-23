@@ -249,6 +249,7 @@ class Server(object):
         if torch.isnan(cos_sim):
             print("cos_sim is NaN.")
             print("value of params1", params1)
+            print("value of params2", params2)
             print("Value of grad1:", grad1)
             print("Value of grad2:", grad2)
         return cos_sim.item()
