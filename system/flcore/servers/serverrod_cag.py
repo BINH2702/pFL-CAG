@@ -55,6 +55,7 @@ class FedCAG_ROD(Server):
 
             g = self.cagrad(grads, self.num_clients)
 
+            model_origin = copy.deepcopy(self.global_model)
             self.overwrite_grad2(self.global_model, g)
             for param in self.global_model.parameters():
                 param.data += param.grad
