@@ -246,6 +246,7 @@ class Server(object):
         # print(torch.dot(grad1, grad2))
         # print((torch.norm(grad1) * torch.norm(grad2)))
         cos_sim = torch.dot(grad1, grad2) / (torch.norm(grad1) * torch.norm(grad2))
+        print(cos_sim.item())
         return cos_sim.item()
 
     def aggregate_parameters(self):
