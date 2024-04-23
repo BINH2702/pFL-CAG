@@ -246,7 +246,10 @@ class Server(object):
         # print(torch.dot(grad1, grad2))
         # print((torch.norm(grad1) * torch.norm(grad2)))
         cos_sim = torch.dot(grad1, grad2) / (torch.norm(grad1) * torch.norm(grad2))
-        print(cos_sim.item())
+        if torch.isnan(cos_sim):
+            print("cos_sim is NaN.")
+            print("Value of grad1:", grad1)
+            print("Value of grad2:", grad2)
         return cos_sim.item()
 
     def aggregate_parameters(self):
