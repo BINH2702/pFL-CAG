@@ -58,7 +58,7 @@ class FedCAG(Server):
             model_origin = copy.deepcopy(self.global_model)
             self.overwrite_grad2(self.global_model, g)
             for param in self.global_model.parameters():
-                param.data += param.grad
+                param.data += 0.5 * param.grad
 
             angle = [self.cos_sim(model_origin, self.global_model, models) for models in self.grads]
             self.angle_value = statistics.mean(angle)
