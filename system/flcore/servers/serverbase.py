@@ -408,7 +408,7 @@ class Server(object):
         print("Std Test Accurancy: {:.4f}".format(np.std(accs)))
         print("Std Test AUC: {:.4f}".format(np.std(aucs)))
         print("Mean_Angle_Value_Compare_Global: {:.4f}".format(angle_value))
-        print("Mean_Angle_value_Grads: {:.4f}".format(grads_angle_value))
+        # print("Mean_Angle_value_Grads: {:.4f}".format(grads_angle_value))
 
         if self.args.log:
             self.writer.add_scalar("charts/train_loss", train_loss, self.current_round)
@@ -429,8 +429,8 @@ class Server(object):
             self.writer.add_scalar("charts/angle_value", angle_value, self.current_round)
             wandb.log({"charts/angle_value": angle_value}, step=self.current_round)
 
-            self.writer.add_scalar("charts/grads_angle_value", grads_angle_value, self.current_round)
-            wandb.log({"charts/grads_angle_value", grads_angle_value}, step=self.current_round)
+            # self.writer.add_scalar("charts/grads_angle_value", grads_angle_value, self.current_round)
+            # wandb.log({"charts/grads_angle_value", grads_angle_value}, step=self.current_round)
 
             self.current_round += 1
 
