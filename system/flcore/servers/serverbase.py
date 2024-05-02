@@ -81,6 +81,7 @@ class Server(object):
 
         self.args = args
         self.angle_value = 0
+        self.grads_angle_value = 0
 
         if self.args.log:
             args.run_name = f"{args.algorithm}__{args.dataset}__{args.num_clients}__{int(time.time())}"
@@ -245,12 +246,18 @@ class Server(object):
         # print(torch.dot(grad1, grad2))
         # print((torch.norm(grad1) * torch.norm(grad2)))
         cos_sim = torch.dot(grad1, grad2) / (torch.norm(grad1) * torch.norm(grad2))
-        if torch.isnan(cos_sim):
-            print("cos_sim is NaN.")
-            print("value of params1", params1)
-            # print("value of params2", params)
-            print("Value of grad1:", grad1)
-            print("Value of grad2:", grad2)
+        # if torch.isnan(cos_sim):
+        #     print("cos_sim is NaN.")
+        #     print("value of params1", params1)
+        #     # print("value of params2", params)
+        #     print("Value of grad1:", grad1)
+        #     print("Value of grad2:", grad2)
+        return cos_sim.item()
+
+    def cosine_similarity(self, model1, model2):
+        params1 = torch.cat([p.data.view(-1) for p in model1.parameters()])
+        params2 = torch.cat([p.data.view(-1) for p in model2.parameters()])
+        cos_sim = torch.dot(params1, params2) / (torch.norm(params1) * torch.norm(params2))
         return cos_sim.item()
 
     def aggregate_parameters(self):
@@ -380,6 +387,7 @@ class Server(object):
         accs = [a / n for a, n in zip(stats[2], stats[1])]
         aucs = [a / n for a, n in zip(stats[3], stats[1])]
         angle_value = self.angle_value
+        grads_angle_value = self.grads_angle_value
         
         if acc == None:
             self.rs_test_acc.append(test_acc)
@@ -399,7 +407,8 @@ class Server(object):
         test_auc_std = np.std(aucs).item()
         print("Std Test Accurancy: {:.4f}".format(np.std(accs)))
         print("Std Test AUC: {:.4f}".format(np.std(aucs)))
-        print("Angle_Value: {:.4f}".format(angle_value))
+        print("Mean_Angle_Value_Compare_Global: {:.4f}".format(angle_value))
+        print("Mean_Angle_value_Grads: {:.4f}".format(grads_angle_value))
 
         if self.args.log:
             self.writer.add_scalar("charts/train_loss", train_loss, self.current_round)
@@ -419,6 +428,9 @@ class Server(object):
 
             self.writer.add_scalar("charts/angle_value", angle_value, self.current_round)
             wandb.log({"charts/angle_value": angle_value}, step=self.current_round)
+
+            self.writer.add_scalar("charts/grads_angle_value", grads_angle_value, self.current_round)
+            wandb.log({"charts/grads_angle_value", grads_angle_value}, step=self.current_round)
 
             self.current_round += 1
 

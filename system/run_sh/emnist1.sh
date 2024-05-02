@@ -15,3 +15,5 @@
 #python3 main.py -log -data Cifar10 -gr 800 -algo FedAvg -m resnet10 -mstr resnet10 -nc 20 --noniid --balance --alpha_dirich 0.1
 #python3 main.py -log -data Cifar10 -gr 400 -algo FedAvg -m resnet10 -mstr resnet10 -nc 20 --noniid --balance --alpha_dirich 1
 python3 main.py -log -data Cifar10 -gr 400 -algo FedCAG -m resnet10 -mstr resnet10 -nc 20 -ls 5 -car 100 -calr 25 -mmt 0.5 -ss 30 -gam 0.5 -lbs 32 --noniid --balance --alpha_dirich 1
+
+python3 main.py -log -data Cifar10 -gr 800 -algo FedAvg -m resnet10 -mstr resnet10 -nc 60 --noniid --balance --alpha_dirich 0.1 -did 1

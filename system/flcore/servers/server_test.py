@@ -63,6 +63,14 @@ class FedCAG(Server):
             angle = [self.cos_sim(model_origin, self.global_model, models) for models in self.grads]
             self.angle_value = statistics.mean(angle)
 
+            angle_value = []
+            for i in self.grads:
+                for j in self.grads:
+                    angle_value = [self.cosine_similarity(i, j)]
+
+            self.grads_angle_value = statistics.mean(angle_value)
+
+
             # if self.dlg_eval and i % self.dlg_gap == 0:
             #     self.call_dlg(i)
             # self.aggregate_parameters()
