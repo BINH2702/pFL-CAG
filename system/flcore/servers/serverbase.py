@@ -62,7 +62,6 @@ class Server(object):
         self.rs_test_acc = []
         self.rs_test_auc = []
         self.rs_train_loss = []
-        # self.angle_value = []
 
         self.times = times
         self.eval_gap = args.eval_gap
@@ -80,7 +79,11 @@ class Server(object):
         self.fine_tuning_epoch = args.fine_tuning_epoch
 
         self.args = args
-        self.angle_value = 0
+        self.angle_ug = 0
+        self.angle_uv = 0
+        self.angle_neg_uv = 0
+        self.angle_neg_ratio = 0
+
         self.grads_angle_value = 0
 
         if self.args.log:
@@ -101,7 +104,6 @@ class Server(object):
                 name=args.run_name,
                 force=True
             )
-
 
     def set_clients(self, clientObj):
         for i, train_slow, send_slow in zip(range(self.num_clients), self.train_slow_clients, self.send_slow_clients):
@@ -386,7 +388,11 @@ class Server(object):
         train_loss = sum(stats_train[2])*1.0 / sum(stats_train[1])
         accs = [a / n for a, n in zip(stats[2], stats[1])]
         aucs = [a / n for a, n in zip(stats[3], stats[1])]
-        angle_value = self.angle_value
+        angle_ug = self.angle_ug
+        angle_uv = self.angle_uv
+        angle_neg_uv = self.angle_neg_uv
+        angle_neg_ratio = self.angle_neg_ratio
+
         grads_angle_value = self.grads_angle_value
         
         if acc == None:
@@ -402,13 +408,15 @@ class Server(object):
         print("Averaged Train Loss: {:.4f}".format(train_loss))
         print("Averaged Test Accurancy: {:.4f}".format(test_acc))
         print("Averaged Test AUC: {:.4f}".format(test_auc))
-        # self.print_(test_acc, train_acc, train_loss)
+
         test_acc_std = np.std(accs).item()
         test_auc_std = np.std(aucs).item()
         print("Std Test Accurancy: {:.4f}".format(np.std(accs)))
         print("Std Test AUC: {:.4f}".format(np.std(aucs)))
-        print("Mean_Angle_Value_Compare_Global: {:.4f}".format(angle_value))
-        # print("Mean_Angle_value_Grads: {:.4f}".format(grads_angle_value))
+        print("Mean_Angle_Value_Compare_Global: {:.4f}".format(angle_ug))
+        print("Mean_Angle_Among_Users: {:.4f}".format(angle_uv))
+        print("Mean_Angle_Among_Conflicted_Users: {:.4f}".format(angle_neg_uv))
+        print("Conflicted_Users_Ratio: {:.4f}".format(angle_neg_ratio))
 
         if self.args.log:
             self.writer.add_scalar("charts/train_loss", train_loss, self.current_round)
@@ -426,8 +434,17 @@ class Server(object):
             self.writer.add_scalar("charts/test_auc_std", test_auc_std, self.current_round)
             wandb.log({"charts/test_auc_std": test_auc_std}, step=self.current_round)
 
-            self.writer.add_scalar("charts/angle_value", angle_value, self.current_round)
-            wandb.log({"charts/angle_value": angle_value}, step=self.current_round)
+            self.writer.add_scalar("charts/angle_value", angle_ug, self.current_round)
+            wandb.log({"charts/angle_value": angle_ug}, step=self.current_round)
+
+            self.writer.add_scalar("charts/user_angle_value", angle_uv, self.current_round)
+            wandb.log({"charts/user_angle_value": angle_uv}, step=self.current_round)
+
+            self.writer.add_scalar("charts/user_neg_angle", angle_neg_uv, self.current_round)
+            wandb.log({"charts/user_neg_angle": angle_neg_uv}, step=self.current_round)
+
+            self.writer.add_scalar("charts/neg_user_ratio", angle_neg_ratio, self.current_round)
+            wandb.log({"charts/neg_user_ratio": angle_neg_ratio}, step=self.current_round)
 
             # self.writer.add_scalar("charts/grads_angle_value", grads_angle_value, self.current_round)
             # wandb.log({"charts/grads_angle_value", grads_angle_value}, step=self.current_round)
