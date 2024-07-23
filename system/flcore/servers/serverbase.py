@@ -105,21 +105,34 @@ class Server(object):
                 force=True
             )
 
+    # def set_clients(self, clientObj):
+    #     for i, train_slow, send_slow in zip(range(self.num_clients), self.train_slow_clients, self.send_slow_clients):
+    #         # train_data = read_client_data(self.dataset, i, is_train=True)
+    #         # test_data = read_client_data(self.dataset, i, is_train=False)
+    #         train_data = read_client_data(self.dataset, i, self.args.noniid, self.args.balance, self.args.alpha_dirich,
+    #                                       is_train=True, num_clients=self.num_clients)
+    #         test_data = read_client_data(self.dataset, i, self.args.noniid, self.args.balance, self.args.alpha_dirich,
+    #                                      is_train=False, num_clients=self.num_clients)
+    #         client = clientObj(self.args,
+    #                         id=i,
+    #                         train_samples=len(train_data),
+    #                         test_samples=len(test_data),
+    #                         train_slow=train_slow,
+    #                         send_slow=send_slow)
+    #         self.clients.append(client)
+
     def set_clients(self, clientObj):
         for i, train_slow, send_slow in zip(range(self.num_clients), self.train_slow_clients, self.send_slow_clients):
-            # train_data = read_client_data(self.dataset, i, is_train=True)
-            # test_data = read_client_data(self.dataset, i, is_train=False)
-            train_data = read_client_data(self.dataset, i, self.args.noniid, self.args.balance, self.args.alpha_dirich,
-                                          is_train=True, num_clients=self.num_clients)
-            test_data = read_client_data(self.dataset, i, self.args.noniid, self.args.balance, self.args.alpha_dirich,
-                                         is_train=False, num_clients=self.num_clients)
-            client = clientObj(self.args,
-                            id=i,
-                            train_samples=len(train_data),
-                            test_samples=len(test_data),
-                            train_slow=train_slow,
+            train_data = read_client_data(self.dataset, i, is_train=True)
+            test_data = read_client_data(self.dataset, i, is_train=False)
+            client = clientObj(self.args, 
+                            id=i, 
+                            train_samples=len(train_data), 
+                            test_samples=len(test_data), 
+                            train_slow=train_slow, 
                             send_slow=send_slow)
             self.clients.append(client)
+
 
     # random select slow clients
     def select_slow_clients(self, slow_rate):
