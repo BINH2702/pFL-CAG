@@ -120,6 +120,7 @@ def generate_DomainNet(dir_path):
         dataset_image = []
         dataset_label = []
 
+        # Mix all into 1
         dataset_image.extend(train_data.cpu().detach().numpy())
         dataset_image.extend(test_data.cpu().detach().numpy())
         dataset_label.extend(train_label.cpu().detach().numpy())
@@ -143,7 +144,7 @@ def generate_DomainNet(dir_path):
 
     train_data, test_data = split_data(X, y)
     # modify the code in YOUR_ENV/lib/python3.8/site-packages/numpy/lib Line #678 from protocol=3 to protocol=4
-    save_file(config_path, train_path, test_path, train_data, test_data, num_clients, max(labelss), 
+    save_file(config_path, train_path, test_path, train_data, test_data, num_clients, max(labelss),
         statistic, None, None, None)
 
 
