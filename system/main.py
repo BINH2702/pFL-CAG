@@ -15,34 +15,34 @@ from flcore.servers.server_test import FedCAG
 # from flcore.servers.serverpFedMe import pFedMe
 # from flcore.servers.serverperavg import PerAvg
 # from flcore.servers.serverprox import FedProx
-# from flcore.servers.serverfomo import FedFomo
+from flcore.servers.serverfomo import FedFomo
 # from flcore.servers.serveramp import FedAMP
 # from flcore.servers.servermtl import FedMTL
 # from flcore.servers.serverlocal import Local
 # from flcore.servers.serverper import FedPer
 # from flcore.servers.serverapfl import APFL
-# from flcore.servers.serverditto import Ditto
+from flcore.servers.serverditto import Ditto
 # from flcore.servers.serverrep import FedRep
 # from flcore.servers.serverphp import FedPHP
-# from flcore.servers.serverbn import FedBN
+from flcore.servers.serverbn import FedBN
 from flcore.servers.serverrod import FedROD
 from flcore.servers.serverrod_cag import FedCAG_ROD
 # from flcore.servers.serverproto import FedProto
 # from flcore.servers.serverdyn import FedDyn
 # from flcore.servers.servermoon import MOON
-# from flcore.servers.serverbabu import FedBABU
+from flcore.servers.serverbabu import FedBABU
 # from flcore.servers.serverapple import APPLE
 # from flcore.servers.servergen import FedGen
 # from flcore.servers.serverscaffold import SCAFFOLD
 # from flcore.servers.serverdistill import FedDistill
 # from flcore.servers.serverala import FedALA
-# from flcore.servers.serverpac import FedPAC
+from flcore.servers.serverpac import FedPAC
 # from flcore.servers.serverlg import LG_FedAvg
 # from flcore.servers.servergc import FedGC
 # from flcore.servers.serverfml import FML
 # from flcore.servers.serverkd import FedKD
-# from flcore.servers.serverpcl import FedPCL
-# from flcore.servers.servercp import FedCP
+from flcore.servers.serverpcl import FedPCL
+from flcore.servers.servercp import FedCP
 # from flcore.servers.servergpfl import GPFL
 
 from flcore.trainmodel.models import *
@@ -212,8 +212,8 @@ def run(args):
         # elif args.algorithm == "FedProx":
         #     server = FedProx(args, i)
         #
-        # elif args.algorithm == "FedFomo":
-        #     server = FedFomo(args, i)
+        elif args.algorithm == "FedFomo":
+            server = FedFomo(args, i)
         #
         # elif args.algorithm == "FedAMP":
         #     server = FedAMP(args, i)
@@ -227,8 +227,8 @@ def run(args):
         #     args.model = BaseHeadSplit(args.model, args.head)
         #     server = FedPer(args, i)
         #
-        # elif args.algorithm == "Ditto":
-        #     server = Ditto(args, i)
+        elif args.algorithm == "Ditto":
+            server = Ditto(args, i)
         #
         # elif args.algorithm == "FedRep":
         #     args.head = copy.deepcopy(args.model.fc)
@@ -242,8 +242,8 @@ def run(args):
         #     args.model = BaseHeadSplit(args.model, args.head)
         #     server = FedPHP(args, i)
         #
-        # elif args.algorithm == "FedBN":
-        #     server = FedBN(args, i)
+        elif args.algorithm == "FedBN":
+            server = FedBN(args, i)
         #
         elif args.algorithm == "FedCagRod":
             args.head = copy.deepcopy(args.model.fc)
@@ -272,11 +272,11 @@ def run(args):
         #     args.model = BaseHeadSplit(args.model, args.head)
         #     server = MOON(args, i)
         #
-        # elif args.algorithm == "FedBABU":
-        #     args.head = copy.deepcopy(args.model.fc)
-        #     args.model.fc = nn.Identity()
-        #     args.model = BaseHeadSplit(args.model, args.head)
-        #     server = FedBABU(args, i)
+        elif args.algorithm == "FedBABU":
+            args.head = copy.deepcopy(args.model.fc)
+            args.model.fc = nn.Identity()
+            args.model = BaseHeadSplit(args.model, args.head)
+            server = FedBABU(args, i)
         #
         # elif args.algorithm == "APPLE":
         #     server = APPLE(args, i)
@@ -296,11 +296,11 @@ def run(args):
         # elif args.algorithm == "FedALA":
         #     server = FedALA(args, i)
         #
-        # elif args.algorithm == "FedPAC":
-        #     args.head = copy.deepcopy(args.model.fc)
-        #     args.model.fc = nn.Identity()
-        #     args.model = BaseHeadSplit(args.model, args.head)
-        #     server = FedPAC(args, i)
+        elif args.algorithm == "FedPAC":
+            args.head = copy.deepcopy(args.model.fc)
+            args.model.fc = nn.Identity()
+            args.model = BaseHeadSplit(args.model, args.head)
+            server = FedPAC(args, i)
         #
         # elif args.algorithm == "LG-FedAvg":
         #     args.head = copy.deepcopy(args.model.fc)
@@ -322,16 +322,16 @@ def run(args):
         #     args.model.fc = nn.Identity()
         #     args.model = BaseHeadSplit(args.model, args.head)
         #     server = FedKD(args, i)
+        
+        elif args.algorithm == "FedPCL":
+            args.model.fc = nn.Identity()
+            server = FedPCL(args, i)
         #
-        # elif args.algorithm == "FedPCL":
-        #     args.model.fc = nn.Identity()
-        #     server = FedPCL(args, i)
-        #
-        # elif args.algorithm == "FedCP":
-        #     args.head = copy.deepcopy(args.model.fc)
-        #     args.model.fc = nn.Identity()
-        #     args.model = BaseHeadSplit(args.model, args.head)
-        #     server = FedCP(args, i)
+        elif args.algorithm == "FedCP":
+            args.head = copy.deepcopy(args.model.fc)
+            args.model.fc = nn.Identity()
+            args.model = BaseHeadSplit(args.model, args.head)
+            server = FedCP(args, i)
         #
         # elif args.algorithm == "GPFL":
         #     args.head = copy.deepcopy(args.model.fc)
@@ -401,7 +401,7 @@ if __name__ == "__main__":
     parser.add_argument('-dlgg', "--dlg_gap", type=int, default=100)
     parser.add_argument('-bnpc', "--batch_num_per_client", type=int, default=2)
     parser.add_argument('-nnc', "--num_new_clients", type=int, default=0)
-    parser.add_argument('-fte', "--fine_tuning_epoch", type=int, default=0)
+    parser.add_argument('-ften', "--fine_tuning_epoch_new", type=int, default=0)
     parser.add_argument('-log', "--log", action='store_true')
     # data
     parser.add_argument("--noniid", action='store_true')
@@ -447,7 +447,7 @@ if __name__ == "__main__":
     # MOON
     parser.add_argument('-tau', "--tau", type=float, default=1.0)
     # FedBABU
-    parser.add_argument('-fts', "--fine_tuning_steps", type=int, default=10)
+    parser.add_argument('-fts', "--fine_tuning_epochs", type=int, default=10)
     # APPLE
     parser.add_argument('-dlr', "--dr_learning_rate", type=float, default=0.0)
     parser.add_argument('-L', "--L", type=float, default=1.0)
@@ -522,7 +522,7 @@ if __name__ == "__main__":
     if args.dlg_eval:
         print("DLG attack round gap: {}".format(args.dlg_gap))
     print("Total number of new clients: {}".format(args.num_new_clients))
-    print("Fine tuning epoches on new clients: {}".format(args.fine_tuning_epoch))
+    print("Fine tuning epoches on new clients: {}".format(args.fine_tuning_epoch_new))
     print("=" * 50)
 
     # if args.dataset == "mnist" or args.dataset == "fmnist":
