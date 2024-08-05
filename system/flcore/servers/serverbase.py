@@ -76,7 +76,7 @@ class Server(object):
         self.num_new_clients = args.num_new_clients
         self.new_clients = []
         self.eval_new_clients = False
-        self.fine_tuning_epoch = args.fine_tuning_epoch
+        self.fine_tuning_epoch = args.fine_tuning_epochs
 
         self.args = args
         self.angle_ug = 0
@@ -85,20 +85,21 @@ class Server(object):
         self.angle_neg_ratio = 0
 
         self.grads_angle_value = 0
+        self.remove_domain = args.remove_domain
 
         if self.args.log:
             args.run_name = f"{args.algorithm}__{args.dataset}__{args.num_clients}__{int(time.time())}"
 
             self.current_round = 0
             self.save_dir = f"runs/{args.run_name}"
-            self.writer = SummaryWriter(self.save_dir)
-            self.writer.add_text(
-                "hyperparameters",
-                "|param|value|\n|-|-|\n%s" % ("\n".join([f"|{key}|{value}|" for key, value in vars(args).items()])),
-            )
+            # self.writer = SummaryWriter(self.save_dir)
+            # self.writer.add_text(
+            #     "hyperparameters",
+            #     "|param|value|\n|-|-|\n%s" % ("\n".join([f"|{key}|{value}|" for key, value in vars(args).items()])),
+            # )
 
             wandb.init(
-                project="PFLA",
+                project="FL-DG",
                 entity="scalemind",
                 config=args,
                 name=args.run_name,
@@ -123,6 +124,8 @@ class Server(object):
 
     def set_clients(self, clientObj):
         for i, train_slow, send_slow in zip(range(self.num_clients), self.train_slow_clients, self.send_slow_clients):
+            if i == self.remove_domain:  # Skip the client with the remove_value index
+                continue
             train_data = read_client_data(self.dataset, i, is_train=True)
             test_data = read_client_data(self.dataset, i, is_train=False)
             client = clientObj(self.args, 
@@ -132,6 +135,7 @@ class Server(object):
                             train_slow=train_slow, 
                             send_slow=send_slow)
             self.clients.append(client)
+            print(i)
 
 
     # random select slow clients
@@ -155,6 +159,8 @@ class Server(object):
             self.current_num_join_clients = np.random.choice(range(self.num_join_clients, self.num_clients+1), 1, replace=False)[0]
         else:
             self.current_num_join_clients = self.num_join_clients
+        if self.args.domain_training:
+            self.current_num_join_clients -= 1
         selected_clients = list(np.random.choice(self.clients, self.current_num_join_clients, replace=False))
 
         return selected_clients
@@ -386,7 +392,6 @@ class Server(object):
 
         return ids, num_samples, losses
 
-
     # evaluate selected clients
     def evaluate(self, acc=None, loss=None):
         stats = self.test_metrics()
@@ -432,31 +437,31 @@ class Server(object):
         print("Conflicted_Users_Ratio: {:.4f}".format(angle_neg_ratio))
 
         if self.args.log:
-            self.writer.add_scalar("charts/train_loss", train_loss, self.current_round)
+            # self.writer.add_scalar("charts/train_loss", train_loss, self.current_round)
             wandb.log({"charts/train_loss": train_loss}, step=self.current_round)
 
-            self.writer.add_scalar("charts/test_acc", test_acc, self.current_round)
+            # self.writer.add_scalar("charts/test_acc", test_acc, self.current_round)
             wandb.log({"charts/test_acc": test_acc}, step=self.current_round)
 
-            self.writer.add_scalar("charts/test_auc", test_auc, self.current_round)
+            # self.writer.add_scalar("charts/test_auc", test_auc, self.current_round)
             wandb.log({"charts/test_auc": test_auc}, step=self.current_round)
 
-            self.writer.add_scalar("charts/test_acc_std", test_acc_std, self.current_round)
+            # self.writer.add_scalar("charts/test_acc_std", test_acc_std, self.current_round)
             wandb.log({"charts/test_acc_std": test_acc_std}, step=self.current_round)
 
-            self.writer.add_scalar("charts/test_auc_std", test_auc_std, self.current_round)
+            # self.writer.add_scalar("charts/test_auc_std", test_auc_std, self.current_round)
             wandb.log({"charts/test_auc_std": test_auc_std}, step=self.current_round)
 
-            self.writer.add_scalar("charts/angle_value", angle_ug, self.current_round)
+            # self.writer.add_scalar("charts/angle_value", angle_ug, self.current_round)
             wandb.log({"charts/angle_value": angle_ug}, step=self.current_round)
 
-            self.writer.add_scalar("charts/user_angle_value", angle_uv, self.current_round)
+            # self.writer.add_scalar("charts/user_angle_value", angle_uv, self.current_round)
             wandb.log({"charts/user_angle_value": angle_uv}, step=self.current_round)
 
-            self.writer.add_scalar("charts/user_neg_angle", angle_neg_uv, self.current_round)
+            # self.writer.add_scalar("charts/user_neg_angle", angle_neg_uv, self.current_round)
             wandb.log({"charts/user_neg_angle": angle_neg_uv}, step=self.current_round)
 
-            self.writer.add_scalar("charts/neg_user_ratio", angle_neg_ratio, self.current_round)
+            # self.writer.add_scalar("charts/neg_user_ratio", angle_neg_ratio, self.current_round)
             wandb.log({"charts/neg_user_ratio": angle_neg_ratio}, step=self.current_round)
 
             # self.writer.add_scalar("charts/grads_angle_value", grads_angle_value, self.current_round)
@@ -534,20 +539,22 @@ class Server(object):
         # self.save_item(items, f'DLG_{R}')
 
     def set_new_clients(self, clientObj):
-        for i in range(self.num_clients, self.num_clients + self.num_new_clients):
-            # train_data = read_client_data(self.dataset, i, is_train=True)
-            # test_data = read_client_data(self.dataset, i, is_train=False)
-            train_data = read_client_data(self.dataset, i, self.args.noniid, self.args.balance, self.args.alpha_dirich,
-                                          is_train=True, num_clients=self.num_clients)
-            test_data = read_client_data(self.dataset, i, self.args.noniid, self.args.balance, self.args.alpha_dirich,
-                                         is_train=False, num_clients=self.num_clients)
-            client = clientObj(self.args, 
-                            id=i, 
-                            train_samples=len(train_data), 
-                            test_samples=len(test_data), 
-                            train_slow=False, 
-                            send_slow=False)
-            self.new_clients.append(client)
+        i = self.remove_domain
+        # for i in range(self.num_clients, self.num_clients + self.num_new_clients):
+        print(i)
+        train_data = read_client_data(self.dataset, i, is_train=True)
+        test_data = read_client_data(self.dataset, i, is_train=False)
+        # train_data = read_client_data(self.dataset, i, self.args.noniid, self.args.balance, self.args.alpha_dirich,
+        #                               is_train=True, num_clients=self.num_clients)
+        # test_data = read_client_data(self.dataset, i, self.args.noniid, self.args.balance, self.args.alpha_dirich,
+        #                              is_train=False, num_clients=self.num_clients)
+        client = clientObj(self.args, 
+                        id=i, 
+                        train_samples=len(train_data), 
+                        test_samples=len(test_data), 
+                        train_slow=False, 
+                        send_slow=False)
+        self.new_clients.append(client)
 
     # fine-tuning on new clients
     def fine_tuning_new_clients(self):

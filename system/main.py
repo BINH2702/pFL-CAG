@@ -479,6 +479,10 @@ if __name__ == "__main__":
     parser.add_argument('-gam', "--gamma", type=float, default=0.5)
     parser.add_argument('-c', "--c_parameter", type=float, default=0.5)
 
+    #Domain_generalization
+    parser.add_argument('-rmd', "--remove_domain", type=int, default=3)
+    parser.add_argument('-dg', "--domain_training", action='store_true')
+
     # RotoGrad
     # parser.add_argument('-starting point', type=int, default=4,
     #                     help="Starting point in the layer for rotate matrix")
@@ -523,6 +527,7 @@ if __name__ == "__main__":
         print("DLG attack round gap: {}".format(args.dlg_gap))
     print("Total number of new clients: {}".format(args.num_new_clients))
     print("Fine tuning epoches on new clients: {}".format(args.fine_tuning_epoch_new))
+    print("Remove domain number: {}".format(args.remove_domain))
     print("=" * 50)
 
     # if args.dataset == "mnist" or args.dataset == "fmnist":
