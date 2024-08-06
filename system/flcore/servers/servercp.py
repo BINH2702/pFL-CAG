@@ -64,8 +64,6 @@ class FedCP(Server):
             #     "hyperparameters",
             #     "|param|value|\n|-|-|\n%s" % ("\n".join([f"|{key}|{value}|" for key, value in vars(args).items()])),
             # )
-
-            # wandb.login(key='528b843354e26ae06f5994740ea776a5798dfaf2')
             wandb.init(
                 project="FL-DG",
                 entity="scalemind",
