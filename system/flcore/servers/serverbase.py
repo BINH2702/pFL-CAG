@@ -97,7 +97,6 @@ class Server(object):
             #     "hyperparameters",
             #     "|param|value|\n|-|-|\n%s" % ("\n".join([f"|{key}|{value}|" for key, value in vars(args).items()])),
             # )
-            wandb.login(key='e9a87a33cf357254cfce9a8349a7d96cef0b1d39')
             wandb.init(
                 project="FL-DG",
                 entity="scalemind",
