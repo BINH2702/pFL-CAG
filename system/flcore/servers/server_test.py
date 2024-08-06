@@ -58,7 +58,7 @@ class FedCAG(Server):
             model_origin = copy.deepcopy(self.global_model)
             self.overwrite_grad2(self.global_model, g)
             for param in self.global_model.parameters():
-                param.data += 0.5 * param.grad
+                param.data += param.grad
 
             angle = [self.cos_sim(model_origin, self.global_model, models) for models in self.grads]
             self.angle_value = statistics.mean(angle)
@@ -88,6 +88,13 @@ class FedCAG(Server):
 
         self.save_results()
         self.save_global_model()
+
+        if self.num_new_clients > 0:
+            self.eval_new_clients = True
+            self.set_new_clients(client_CAG)
+            print(f"\n-------------Fine tuning round-------------")
+            print("\nEvaluate new clients")
+            self.evaluate()
 
     def cagrad(self, grad_vec, num_tasks):
         

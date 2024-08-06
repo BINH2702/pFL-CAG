@@ -97,7 +97,7 @@ class Server(object):
             #     "hyperparameters",
             #     "|param|value|\n|-|-|\n%s" % ("\n".join([f"|{key}|{value}|" for key, value in vars(args).items()])),
             # )
-
+            wandb.login(key='e9a87a33cf357254cfce9a8349a7d96cef0b1d39')
             wandb.init(
                 project="FL-DG",
                 entity="scalemind",
@@ -124,8 +124,9 @@ class Server(object):
 
     def set_clients(self, clientObj):
         for i, train_slow, send_slow in zip(range(self.num_clients), self.train_slow_clients, self.send_slow_clients):
-            if i == self.remove_domain:  # Skip the client with the remove_value index
-                continue
+            if self.args.domain_training:
+                if i == self.remove_domain:  # Skip the client with the remove_value index
+                    continue
             train_data = read_client_data(self.dataset, i, is_train=True)
             test_data = read_client_data(self.dataset, i, is_train=False)
             client = clientObj(self.args, 
@@ -135,8 +136,6 @@ class Server(object):
                             train_slow=train_slow, 
                             send_slow=send_slow)
             self.clients.append(client)
-            print(i)
-
 
     # random select slow clients
     def select_slow_clients(self, slow_rate):

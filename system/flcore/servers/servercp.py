@@ -22,6 +22,7 @@ from flcore.clients.clientcp import *
 from flcore.servers.serverbase import Server
 from utils.data_utils import read_client_data
 from threading import Thread
+import wandb
 
 
 class FedCP(Server):
@@ -52,6 +53,28 @@ class FedCP(Server):
         self.Budget = []
         self.head = None
         self.cs = None
+
+        if self.args.log:
+            args.run_name = f"{args.algorithm}__{args.dataset}__{args.num_clients}__{int(time.time())}"
+
+            self.current_round = 0
+            self.save_dir = f"runs/{args.run_name}"
+            # self.writer = SummaryWriter(self.save_dir)
+            # self.writer.add_text(
+            #     "hyperparameters",
+            #     "|param|value|\n|-|-|\n%s" % ("\n".join([f"|{key}|{value}|" for key, value in vars(args).items()])),
+            # )
+
+            # wandb.login(key='528b843354e26ae06f5994740ea776a5798dfaf2')
+            wandb.login(key='e9a87a33cf357254cfce9a8349a7d96cef0b1d39')
+
+            wandb.init(
+                project="FL-DG",
+                entity="scalemind",
+                config=args,
+                name=args.run_name,
+                force=True
+            )
 
 
     def send_models(self):
@@ -87,6 +110,13 @@ class FedCP(Server):
 
         print("Averaged Test Accurancy: {:.4f}".format(test_acc))
         print("Averaged Test AUC: {:.4f}".format(test_auc))
+
+        if self.args.log:
+            wandb.log({"charts/test_acc": test_acc}, step=self.current_round)
+
+            wandb.log({"charts/test_auc": test_auc}, step=self.current_round)
+
+            self.current_round += 1
 
 
     def train(self):

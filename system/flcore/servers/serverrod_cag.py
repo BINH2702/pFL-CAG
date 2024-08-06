@@ -80,6 +80,13 @@ class FedCAG_ROD(Server):
         self.save_results()
         self.save_global_model()
 
+        if self.num_new_clients > 0:
+            self.eval_new_clients = True
+            self.set_new_clients(clientROD)
+            print(f"\n-------------Fine tuning round-------------")
+            print("\nEvaluate new clients")
+            self.evaluate()
+
     def cagrad(self, grad_vec, num_tasks):
 
         grads = grad_vec.to(self.device)

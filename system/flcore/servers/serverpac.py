@@ -25,6 +25,7 @@ from flcore.clients.clientpac import clientPAC
 from flcore.servers.serverbase import Server
 from threading import Thread
 from collections import defaultdict
+import wandb
 
 
 class FedPAC(Server):
@@ -46,6 +47,28 @@ class FedPAC(Server):
         self.Vars = []
         self.Hs = []
         self.uploaded_heads = []
+
+        if self.args.log:
+            args.run_name = f"{args.algorithm}__{args.dataset}__{args.num_clients}__{int(time.time())}"
+
+            self.current_round = 0
+            self.save_dir = f"runs/{args.run_name}"
+            # self.writer = SummaryWriter(self.save_dir)
+            # self.writer.add_text(
+            #     "hyperparameters",
+            #     "|param|value|\n|-|-|\n%s" % ("\n".join([f"|{key}|{value}|" for key, value in vars(args).items()])),
+            # )
+
+            # wandb.login(key='528b843354e26ae06f5994740ea776a5798dfaf2')
+            wandb.login(key='e9a87a33cf357254cfce9a8349a7d96cef0b1d39')
+
+            wandb.init(
+                project="FL-DG",
+                entity="scalemind",
+                config=args,
+                name=args.run_name,
+                force=True
+            )
 
 
     def train(self):
@@ -134,11 +157,20 @@ class FedPAC(Server):
         #     self.rs_train_loss.append(train_loss)
         # else:
         #     loss.append(train_loss)
-
+        test_acc_std = np.std(accs).item()
         # print("Averaged Train Loss: {:.4f}".format(train_loss))
         print("Averaged Test Accurancy: {:.4f}".format(test_acc))
         # self.print_(test_acc, train_acc, train_loss)
         print("Std Test Accurancy: {:.4f}".format(np.std(accs)))
+
+        if self.args.log:
+            # self.writer.add_scalar("charts/test_acc", test_acc, self.current_round)
+            wandb.log({"charts/test_acc": test_acc}, step=self.current_round)
+
+            # self.writer.add_scalar("charts/test_auc_std", test_auc_std, self.current_round)
+            wandb.log({"charts/test_auc_std": test_acc_std}, step=self.current_round)
+
+            self.current_round += 1
 
     def receive_models(self):
         assert (len(self.selected_clients) > 0)
